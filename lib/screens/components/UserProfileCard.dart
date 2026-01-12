@@ -74,7 +74,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
     );
     var sloganStyle = TextStyle(
       fontSize: 10,
-      color: theme.textTheme.bodyText1?.color?.withOpacity(.5),
+      color: theme.textTheme.bodyLarge?.color?.withOpacity(.5),
     );
     var sloganStrutStyle = const StrutStyle(
       fontSize: 10,

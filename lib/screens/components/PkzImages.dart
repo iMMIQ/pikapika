@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapika/basic/Method.dart';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, ImageDecoder;
+import 'dart:ui' as ui;
 import 'Images.dart';
 import 'dart:typed_data';
 
@@ -16,10 +17,10 @@ class PkzImageProvider extends ImageProvider<PkzImageProvider> {
   @override
   ImageStreamCompleter load(
     PkzImageProvider key,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
     );
   }
@@ -29,11 +30,11 @@ class PkzImageProvider extends ImageProvider<PkzImageProvider> {
     return SynchronousFuture<PkzImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(PkzImageProvider key) async {
+  Future<ui.Codec> _loadAsync(PkzImageProvider key, ImageDecoderCallback decode) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-      await method.loadPkzFile(pkzPath, path),
-    );
+    final bytes = await method.loadPkzFile(pkzPath, path);
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
@@ -46,7 +47,7 @@ class PkzImageProvider extends ImageProvider<PkzImageProvider> {
   }
 
   @override
-  int get hashCode => hashValues(path, scale);
+  int get hashCode => Object.hash(path, scale);
 
   @override
   String toString() => '$runtimeType('

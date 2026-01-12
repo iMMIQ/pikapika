@@ -69,7 +69,7 @@ class _ComicCollectionsScreenState extends State<ComicCollectionsScreen> {
             );
           }
           final ThemeData theme = Theme.of(context);
-          final AppBarTheme appBarTheme = AppBarTheme.of(context);
+          final AppBarThemeData appBarTheme = AppBarTheme.of(context);
           return DefaultTabController(
             length: collection.length,
             child: Scaffold(

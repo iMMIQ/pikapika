@@ -386,7 +386,7 @@ class _DustyBlueTheme extends _ThemePackage {
             color: Colors.white,
           ),
         ),
-        dialogTheme: const DialogTheme(
+        dialogTheme: const DialogThemeData(
           backgroundColor: Color(0xff20253b),
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(

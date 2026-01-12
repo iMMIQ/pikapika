@@ -8,7 +8,8 @@ import 'package:pikapika/basic/Method.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pikapika/basic/config/ImageAddress.dart';
 import 'dart:io';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, ImageDecoder;
+import 'dart:ui' as ui;
 
 import '../../basic/config/IconLoading.dart';
 import '../FilePhotoViewScreen.dart';
@@ -24,10 +25,10 @@ class ResourceFileImageProvider
   @override
   ImageStreamCompleter load(
     ResourceFileImageProvider key,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
     );
   }
@@ -38,11 +39,11 @@ class ResourceFileImageProvider
     return SynchronousFuture<ResourceFileImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(ResourceFileImageProvider key) async {
+  Future<ui.Codec> _loadAsync(ResourceFileImageProvider key, ImageDecoderCallback decode) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-      await File(path).readAsBytes(),
-    );
+    final bytes = await File(path).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
@@ -53,7 +54,7 @@ class ResourceFileImageProvider
   }
 
   @override
-  int get hashCode => hashValues(path, scale);
+  int get hashCode => Object.hash(path, scale);
 
   @override
   String toString() => '$runtimeType('
@@ -73,10 +74,10 @@ class ResourceDownloadFileImageProvider
   @override
   ImageStreamCompleter load(
     ResourceDownloadFileImageProvider key,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
     );
   }
@@ -87,10 +88,11 @@ class ResourceDownloadFileImageProvider
     return SynchronousFuture<ResourceDownloadFileImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(ResourceDownloadFileImageProvider key) async {
+  Future<ui.Codec> _loadAsync(ResourceDownloadFileImageProvider key, ImageDecoderCallback decode) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-        await File(await method.downloadImagePath(path)).readAsBytes());
+    final bytes = await File(await method.downloadImagePath(path)).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
@@ -101,7 +103,7 @@ class ResourceDownloadFileImageProvider
   }
 
   @override
-  int get hashCode => hashValues(path, scale);
+  int get hashCode => Object.hash(path, scale);
 
   @override
   String toString() => '$runtimeType('
@@ -122,10 +124,10 @@ class ResourceRemoteImageProvider
   @override
   ImageStreamCompleter load(
     ResourceRemoteImageProvider key,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
     );
   }
@@ -136,12 +138,12 @@ class ResourceRemoteImageProvider
     return SynchronousFuture<ResourceRemoteImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(ResourceRemoteImageProvider key) async {
+  Future<ui.Codec> _loadAsync(ResourceRemoteImageProvider key, ImageDecoderCallback decode) async {
     assert(key == this);
     var downloadTo = await method.remoteImageData(fileServer, path);
-    return PaintingBinding.instance!.instantiateImageCodec(
-      await File(downloadTo.finalPath).readAsBytes(),
-    );
+    final bytes = await File(downloadTo.finalPath).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
@@ -154,7 +156,7 @@ class ResourceRemoteImageProvider
   }
 
   @override
-  int get hashCode => hashValues(fileServer, path, scale);
+  int get hashCode => Object.hash(fileServer, path, scale);
 
   @override
   String toString() => '$runtimeType('
